@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express();
 
@@ -10,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.2fbewnn.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -28,6 +29,7 @@ async function run() {
         await client.connect();
 
         const coffeeCollection = client.db("coffeeDB").collection("coffee");
+        const userCollection = client.db("coffeeDB").collection("users");
 
         app.get('/coffee', async (req, res) => {
             const cursor = coffeeCollection.find();
@@ -76,6 +78,14 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await coffeeCollection.deleteOne(query)
+            res.send(result)
+        })
+
+        //user------------------------
+        app.post('/users', async (req, res) => {
+            const newUser = req.body;
+            console.log(newUser)
+            const result = await userCollection.insertOne(newUser);
             res.send(result)
         })
 
